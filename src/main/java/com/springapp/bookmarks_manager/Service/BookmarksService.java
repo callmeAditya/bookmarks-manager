@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.springapp.bookmarks_manager.Exception.ResourceNotFoundException;
 import com.springapp.bookmarks_manager.Model.Bookmarks;
 import com.springapp.bookmarks_manager.Repository.BookmarksRepo;
 
@@ -16,7 +17,6 @@ public class BookmarksService {
     private BookmarksRepo bookmarksRepo;
 
     public List<Bookmarks> getAllBookmarks() {
-        // TODO Auto-generated method stub
         return bookmarksRepo.findAll();
     }
 
@@ -25,17 +25,19 @@ public class BookmarksService {
     }
 
     public void createBookmark(Bookmarks bookmark) {
-        // TODO Auto-generated method stub
         bookmarksRepo.save(bookmark);
     }
 
     public void deleteBookMark(String id) {
-        // TODO Auto-generated method stub
         bookmarksRepo.deleteById(id);
     }
 
     public Bookmarks updateBookmarks(Bookmarks bookmarks) {
-        // TODO Auto-generated method stub
+        Optional<Bookmarks> res = bookmarksRepo.findById(bookmarks.getId());
+        System.out.println(res);
+        if(res.isEmpty()){
+            throw new ResourceNotFoundException("Bookmark not found");
+        }
         return bookmarksRepo.save(bookmarks);
     }
 

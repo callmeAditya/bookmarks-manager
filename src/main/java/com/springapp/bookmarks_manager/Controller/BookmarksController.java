@@ -1,5 +1,6 @@
 package com.springapp.bookmarks_manager.Controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.springapp.bookmarks_manager.Exception.ResourceNotFoundException;
 import  com.springapp.bookmarks_manager.Model.Bookmarks;
+import com.springapp.bookmarks_manager.Model.BookmarksDTO;
 import com.springapp.bookmarks_manager.Service.BookmarksService;
 
 @RestController
@@ -30,14 +34,16 @@ public class BookmarksController {
         return bookmarksService.getAllBookmarks();
     }
 
-    @GetMapping("/get:{id}")
-    public Optional<Bookmarks> getBookmarkById(@PathVariable String id){
-        return bookmarksService.getBookmarksById(id);
+    @GetMapping("/get/{id}")
+    public Bookmarks getBookmarkById(@PathVariable String id){
+       return bookmarksService.getBookmarksById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bookmark not found"));
     }
 
     @PostMapping("/create")
     public ResponseEntity<String> createBookmark(@RequestBody Bookmarks bookmark ){
-        bookmark.setBookmarksID(UUID.randomUUID().toString());
+        bookmark.setId(UUID.randomUUID().toString());
+        bookmark.setCreatedAt(new Date());
         bookmarksService.createBookmark(bookmark);
         return ResponseEntity.ok("Bookmark added");
     }
@@ -47,10 +53,9 @@ public class BookmarksController {
        return bookmarksService.updateBookmarks(bookmarks);
     }
 
-    @DeleteMapping("/delete:{id}")
-    public ResponseEntity<String> deleteBookMark(@PathVariable String id){
-        bookmarksService.deleteBookMark(id);
-
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteBookMark(@RequestBody BookmarksDTO bookmarksDTO){
+        bookmarksService.deleteBookMark(bookmarksDTO.getId());
         return ResponseEntity.ok("Bookmark deleted");
     }
 

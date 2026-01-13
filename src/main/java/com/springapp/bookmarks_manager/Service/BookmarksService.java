@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.springapp.bookmarks_manager.Exception.ResourceNotFoundException;
@@ -16,8 +18,9 @@ public class BookmarksService {
     @Autowired
     private BookmarksRepo bookmarksRepo;
 
-    public List<Bookmarks> getAllBookmarks() {
-        return bookmarksRepo.findAll();
+    public List<Bookmarks> getAllBookmarks(String email) {
+        List<Bookmarks> bookmarks = bookmarksRepo.findByEmail(email);
+        return bookmarks;
     }
 
     public Optional<Bookmarks> getBookmarksById(String id) {

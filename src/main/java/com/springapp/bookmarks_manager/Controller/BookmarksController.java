@@ -7,7 +7,10 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import jakarta.annotation.PostConstruct;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,9 +32,21 @@ public class BookmarksController {
     @Autowired
     private BookmarksService bookmarksService;
 
+ 
+
     @GetMapping("/getAll")
-    public List<Bookmarks> getAllBookmarks(){
-        return bookmarksService.getAllBookmarks();
+    public ResponseEntity<List<Bookmarks>> getAllBookmarks(){
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String email = authentication.getPrincipal().toString();
+        return ResponseEntity.ok(bookmarksService.getAllBookmarks(email));
+    }
+
+    @GetMapping("/test")
+    public String tester(){
+       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String username = authentication.getPrincipal().toString();
+    System.out.println(username);
+    return username;
     }
 
     @GetMapping("/get/{id}")
@@ -41,11 +56,14 @@ public class BookmarksController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createBookmark(@RequestBody Bookmarks bookmark ){
+    public ResponseEntity<Bookmarks> createBookmark(@RequestBody Bookmarks bookmark ){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getPrincipal().toString();
         bookmark.setId(UUID.randomUUID().toString());
         bookmark.setCreatedAt(new Date());
+        bookmark.setEmail(email);
         bookmarksService.createBookmark(bookmark);
-        return ResponseEntity.ok("Bookmark added");
+        return ResponseEntity.ok(bookmark);
     }
 
     @PostMapping("/update")

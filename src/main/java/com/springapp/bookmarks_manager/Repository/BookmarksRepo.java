@@ -13,4 +13,6 @@ public interface BookmarksRepo extends MongoRepository<Bookmarks, String>{
 
     List<Bookmarks> findByEmail(String email);
 
+    boolean existsByEmailAndUrl(String email, String URL);
+
 }

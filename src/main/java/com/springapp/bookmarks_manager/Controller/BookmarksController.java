@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springapp.bookmarks_manager.Exception.BookmarkAlreadyExistException;
 import com.springapp.bookmarks_manager.Exception.ResourceNotFoundException;
 import  com.springapp.bookmarks_manager.Model.Bookmarks;
 import com.springapp.bookmarks_manager.Model.BookmarksDTO;
@@ -45,7 +48,6 @@ public class BookmarksController {
     public String tester(){
        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String username = authentication.getPrincipal().toString();
-    System.out.println(username);
     return username;
     }
 
@@ -56,14 +58,22 @@ public class BookmarksController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Bookmarks> createBookmark(@RequestBody Bookmarks bookmark ){
+    public ResponseEntity<String> createBookmark(@RequestBody Bookmarks bookmark ) throws Exception{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getPrincipal().toString();
+      // 1. Logic to check for existing bookmark (example by URL)
+        if (bookmarksService.existsByUrlAndEmail(bookmark.getUrl(), email)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Bookmark already exist");
+            // throw new BookmarkAlreadyExistException("Bookmark already exists", new Throwable());
+        }
+
+        // 2. Proceed with creation
         bookmark.setId(UUID.randomUUID().toString());
         bookmark.setCreatedAt(new Date());
         bookmark.setEmail(email);
+        
         bookmarksService.createBookmark(bookmark);
-        return ResponseEntity.ok(bookmark);
+        return ResponseEntity.ok("Bookmark successfully created");
     }
 
     @PostMapping("/update")

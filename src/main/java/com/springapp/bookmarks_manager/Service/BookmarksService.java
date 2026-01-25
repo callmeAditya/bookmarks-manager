@@ -27,21 +27,31 @@ public class BookmarksService {
         return bookmarksRepo.findById(id);
     }
 
-    public void createBookmark(Bookmarks bookmark) {
+    public void createBookmark(Bookmarks bookmark) throws Exception {
+
         bookmarksRepo.save(bookmark);
     }
 
     public void deleteBookMark(String id) {
+         Optional<Bookmarks> res = bookmarksRepo.findById(id);
+        if(res.isEmpty()){
+            throw new ResourceNotFoundException("Error: Cannot delete. Bookmark not found");
+        }
         bookmarksRepo.deleteById(id);
     }
 
     public Bookmarks updateBookmarks(Bookmarks bookmarks) {
         Optional<Bookmarks> res = bookmarksRepo.findById(bookmarks.getId());
-        System.out.println(res);
         if(res.isEmpty()){
             throw new ResourceNotFoundException("Bookmark not found");
         }
         return bookmarksRepo.save(bookmarks);
+    }
+
+    public boolean existsByUrlAndEmail(String url, String email) {
+        // TODO Auto-generated method stub
+        return bookmarksRepo.existsByEmailAndUrl(email, url);
+        
     }
 
 

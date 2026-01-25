@@ -23,7 +23,6 @@ public class MyUserDetailsService implements UserDetailsService {
 	UserDTO user= repo.findByEmail(email);
 	
 	if (user==null) {
-		System.out.println("User 404");
 		throw new UsernameNotFoundException("User 404");
 	}
 		 return new UserPrincipal(user);

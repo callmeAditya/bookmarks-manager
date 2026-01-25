@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,8 @@ import lombok.Data;
 
 @Component
 @Data
-// @Document(collection = "bookmarks")
+@Document(collection = "bookmarks")
+@CompoundIndex(def = "{'email': 1, 'url': 1}", unique = true)
 public class Bookmarks {
 
     @Id
@@ -19,7 +21,7 @@ public class Bookmarks {
     String email;
     String BookmarksID;
     String Title;
-    String URL;
+    String url;
     String Description;
     Date CreatedAt;
     List<String> Categories;

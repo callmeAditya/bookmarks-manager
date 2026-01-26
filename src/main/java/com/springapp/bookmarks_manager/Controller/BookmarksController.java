@@ -29,7 +29,7 @@ import com.springapp.bookmarks_manager.Service.BookmarksService;
 
 @RestController
 @RequestMapping("bookmarks")
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin(origins = "http://localhost:3000")
 public class BookmarksController {
 
     @Autowired

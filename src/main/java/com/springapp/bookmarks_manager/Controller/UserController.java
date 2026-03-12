@@ -1,25 +1,22 @@
 package com.springapp.bookmarks_manager.Controller;
 
-import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springapp.bookmarks_manager.Exception.ResourceNotFoundException;
-import com.springapp.bookmarks_manager.Model.Bookmarks;
+import com.springapp.bookmarks_manager.Exception.UserAlreadyExistsException;
+import com.springapp.bookmarks_manager.Exception.UserDoesNotExistException;
 import com.springapp.bookmarks_manager.Model.UserDTO;
-import com.springapp.bookmarks_manager.Service.BookmarksService;
+import com.springapp.bookmarks_manager.Repository.UserRepo;
 import com.springapp.bookmarks_manager.Service.JwtService;
 import com.springapp.bookmarks_manager.Service.UserService;
 
@@ -36,6 +33,9 @@ public class UserController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private UserRepo userRepo;
+
     // @PostMapping("/register")
 	// public UserDTO register(@RequestBody UserDTO user) {
     //     user.setId(UUID.randomUUID().toString());
@@ -45,14 +45,22 @@ public class UserController {
 	// }  
     
     @PostMapping("/register")
-	public ResponseEntity<String> register(@RequestBody UserDTO user) {
+	public ResponseEntity<String> register(@RequestBody UserDTO user) throws Exception {
         user.setId(UUID.randomUUID().toString());
-        userService.saveUser(user);
+        try{
+            userService.saveUser(user);
+
+        }catch(UserAlreadyExistsException e1){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: User already exist");
+        }
 	  return ResponseEntity.ok("User registered successfully ✅") ;
 	}
 
     @PostMapping("/login")
     public String login(@RequestBody UserDTO userDTO){
+        if(userRepo.findByEmail(userDTO.getEmail())==null){
+			throw new UserDoesNotExistException("User does not exists");
+		}
         Authentication authentication = authenticationManager
         .authenticate(new UsernamePasswordAuthenticationToken(userDTO.getEmail(), userDTO.getPassword()));
 

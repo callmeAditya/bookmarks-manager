@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.springapp.bookmarks_manager.Exception.UserAlreadyExistsException;
 import com.springapp.bookmarks_manager.Model.UserDTO;
 import com.springapp.bookmarks_manager.Repository.UserRepo;
 
@@ -16,7 +17,10 @@ public class UserService {
 
     private BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 
-	public UserDTO saveUser(UserDTO user) {
+	public UserDTO saveUser(UserDTO user) throws Exception{
+		if(userRepo.findByEmail(user.getEmail())!=null){
+			throw new UserAlreadyExistsException("User already exists");
+		}
 	user.setPassword(encoder.encode(user.getPassword()));
 	return userRepo.save(user) ;
 		
